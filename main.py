@@ -13,8 +13,7 @@ df_boston = pd.read_sql('SELECT firstName, lastName, jobTitle FROM employees JOI
 
 # Offices with zero employees
 # then HAVING keeps only the ones with a count of 0
-df_zero_emp = pd.read_sql('SELECT offices.officeCode, offices.city, COUNT(employees.employeeNumber) AS n_employees FROM offices LEFT JOIN employees ON offices.officeCode = employees.officeCode GROUP BY offices.officeCode HAVING n_employees = 0', conn)
-
+df_zero_emp = pd.read_sql('SELECT offices.officeCode, offices.city FROM offices LEFT JOIN employees ON offices.officeCode = employees.officeCode GROUP BY offices.officeCode HAVING COUNT(employees.employeeNumber) = 0', conn)
 
 # All employees with their office city/state
 df_employee = pd.read_sql('SELECT firstName, lastName, city, state FROM employees LEFT JOIN offices ON employees.officeCode = offices.officeCode ORDER BY firstName, lastName', conn)
@@ -39,6 +38,5 @@ df_total_customers = pd.read_sql('SELECT productName, products.productCode, COUN
 df_customers = pd.read_sql('SELECT COUNT(customers.customerNumber) AS n_customers, offices.officeCode, offices.city FROM customers JOIN employees ON customers.salesRepEmployeeNumber = employees.employeeNumber JOIN offices ON employees.officeCode = offices.officeCode GROUP BY offices.officeCode', conn)
 
 # Employees who sold products ordered by fewer than 20 customers.
-df_under_20 = pd.read_sql('SELECT DISTINCT employees.employeeNumber, employees.firstName, employees.lastName, offices.city, offices.officeCode FROM employees JOIN offices ON employees.officeCode = offices.officeCode JOIN customers ON employees.employeeNumber = customers.salesRepEmployeeNumber JOIN orders ON customers.customerNumber = orders.customerNumber JOIN orderdetails ON orders.orderNumber = orderdetails.orderNumber WHERE orderdetails.productCode IN (SELECT orderdetails.productCode FROM orderdetails JOIN orders ON orderdetails.orderNumber = orders.orderNumber GROUP BY orderdetails.productCode HAVING COUNT(DISTINCT orders.customerNumber) < 20)', conn)
-
+df_under_20 = pd.read_sql('SELECT DISTINCT employees.employeeNumber, employees.firstName, employees.lastName, offices.city, offices.officeCode FROM employees JOIN offices ON employees.officeCode = offices.officeCode JOIN customers ON employees.employeeNumber = customers.salesRepEmployeeNumber JOIN orders ON customers.customerNumber = orders.customerNumber JOIN orderdetails ON orders.orderNumber = orderdetails.orderNumber WHERE orderdetails.productCode IN (SELECT orderdetails.productCode FROM orderdetails JOIN orders ON orderdetails.orderNumber = orders.orderNumber GROUP BY orderdetails.productCode HAVING COUNT(DISTINCT orders.customerNumber) < 20) ORDER BY employees.employeeNumber', conn)
 conn.close()
